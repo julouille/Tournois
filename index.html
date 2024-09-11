@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tournoi Rocket League 1v1 - 64 participants</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #121212;
+            color: #e0e0e0;
+        }
+        header {
+            background-color: #1e1e1e;
+            color: #fff;
+            text-align: center;
+            padding: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+        main {
+            padding: 2rem;
+            max-width: 100%;
+            margin: 0 auto;
+            overflow-x: auto;
+        }
+        h1, h2, h3 {
+            color: #ff6b6b;
+        }
+        form {
+            background-color: #1e1e1e;
+            padding: 20px;
+            border-radius: 5px;
+            margin-top: 20px;
+            max-width: 500px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #4ecdc4;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #333;
+            background-color: #2c2c2c;
+            color: #e0e0e0;
+            border-radius: 3px;
+        }
+        input[type="submit"] {
+            background-color: #4ecdc4;
+            color: #121212;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+        }
+        input[type="submit"]:hover {
+            background-color: #45b7aa;
+        }
+        .tournament-tree {
+            display: flex;
+            justify-content: flex-start;
+            margin-top: 40px;
+            min-width: 2000px;
+            position: relative;
+        }
+        .round {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            margin-right: 40px;
+        }
+        .match {
+            background-color: #1e1e1e;
+            border: 1px solid #4ecdc4;
+            border-radius: 5px;
+            padding: 5px;
+            margin: 2px 0;
+            width: 150px;
+            position: relative;
+        }
+        .player {
+            margin: 2px 0;
+            padding: 2px;
+            background-color: #2c2c2c;
+            border-radius: 3px;
+            font-size: 0.8em;
+        }
+        .winner {
+            background-color: #4ecdc4;
+            color: #121212;
+        }
+        .connector {
+            position: absolute;
+            right: -40px;
+            width: 40px;
+            border-top: 2px solid #4ecdc4;
+        }
+        .connector::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: -8px;
+            width: 0;
+            height: 0;
+            border-left: 8px solid #4ecdc4;
+            border-top: 8px solid transparent;
+            border-bottom: 8px solid transparent;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Tournoi Rocket League 1v1 - 64 participants</h1>
+    </header>
+    <main>
+        <h2>Bienvenue au tournoi Rocket League 1v1 !</h2>
+        
+        <h3>Inscription au tournoi :</h3>
+        <form id="inscriptionForm">
+            <label for="pseudo">Pseudo en jeu :</label>
+            <input type="text" id="pseudo" name="pseudo" required placeholder="Ex: RocketMaster">
+            
+            <label for="rang">Rang :</label>
+            <input type="text" id="rang" name="rang" required placeholder="Ex: Diamant2">
+            
+            <input type="submit" value="S'inscrire">
+        </form>
+        
+        <h3>Arbre du tournoi :</h3>
+        <div id="tournamentTree" class="tournament-tree">
+        </div>
+        
+        <h3>Liste des participants inscrits : <span id="participantCount">0</span>/64</h3>
+        <table id="participantsTable">
+            <tr>
+                <th>Pseudo en jeu</th>
+                <th>Rang</th>
+            </tr>
+        </table>
+    </main>
+
+    <script>
+        const participants = [];
+        const rounds = 6;
+
+        function generateTournamentTree() {
+            const treeContainer = document.getElementById('tournamentTree');
+            treeContainer.innerHTML = '';
+            
+            for (let i = 0; i < rounds; i++) {
+                const roundDiv = document.createElement('div');
+                roundDiv.className = 'round';
+                const matchesInRound = Math.pow(2, rounds - i - 1);
+                
+                for (let j = 0; j < matchesInRound; j++) {
+                    const matchDiv = document.createElement('div');
+                    matchDiv.className = 'match';
+                    matchDiv.innerHTML = 
+                        `<div class="player">${i === 0 ? `Joueur ${j * 2 + 1}` : ''}</div>
+                         <div class="player">${i === 0 ? `Joueur ${j * 2 + 2}` : ''}</div>`;
+                    
+                    if (i < rounds - 1) {
+                        const connector = document.createElement('div');
+                        connector.className = 'connector';
+                        connector.style.top = '50%';
+                        matchDiv.appendChild(connector);
+                    }
+                    
+                    roundDiv.appendChild(matchDiv);
+                }
+                
+                treeContainer.appendChild(roundDiv);
+            }
+        }
+        
+        function updateParticipantList() {
+            const table = document.getElementById('participantsTable');
+            const countSpan = document.getElementById('participantCount');
+            
+            while (table.rows.length > 1) {
+                table.deleteRow(1);
+            }
+            
+            participants.forEach(participant => {
+                const newRow = table.insertRow(-1);
+                const cell1 = newRow.insertCell(0);
+                const cell2 = newRow.insertCell(1);
+                
+                cell1.textContent = participant.pseudo;
+                cell2.textContent = participant.rang;
+            });
+            
+            countSpan.textContent = participants.length;
+        }
+        
+        function updateTournamentTree() {
+            const matches = document.querySelectorAll('.round:first-child .match');
+            participants.forEach((participant, index) => {
+                const playerDiv = matches[Math.floor(index / 2)].querySelector(`.player:nth-child(${index % 2 + 1})`);
+                playerDiv.textContent = participant.pseudo;
+            });
+        }
+        
+        document.getElementById('inscriptionForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            if (participants.length >= 64) {
+                alert('Le tournoi est complet !');
+                return;
+            }
+            
+            const pseudo = document.getElementById('pseudo').value;
+            const rang = document.getElementById('rang').value;
+            
+            participants.push({ pseudo, rang });
+            
+            updateParticipantList();
+            updateTournamentTree();
+            
+            this.reset();
+            
+            if (participants.length === 64) {
+                alert('Le tournoi est maintenant complet !');
+                this.style.display = 'none';
+            } else {
+                alert('Inscription réussie !');
+            }
+        });
+        
+        generateTournamentTree();
+    </script>
+</body>
+</html>
